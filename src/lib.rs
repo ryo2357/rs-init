@@ -1,7 +1,7 @@
-use log::error;
 use std::panic::{self, PanicInfo};
 
 mod setup_logger;
+pub use log::{debug, error, info, warn};
 
 pub fn init() {
     setup_panic();
