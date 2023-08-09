@@ -20,35 +20,36 @@ pub fn setup_logger() {
 
 #[cfg(debug_assertions)]
 fn make_logger(log_file_path: &str) {
-    // println!("デバッグ用のロガー");
     // ファイル・コマンドライン
     let stderr = ConsoleAppender::builder()
         .target(Target::Stderr)
-        .encoder(Box::new(PatternEncoder::new("{l} - {f},{L} - {m}\n")))
+        .encoder(Box::new(PatternEncoder::new("{l} - {f},{L} - {m}{n}")))
         .build();
 
     // ファイル出力の設定
     let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
-            "{h({l})},{d},{f},{L},{M},{m},{n}",
+            "{d(%Y-%m-%d %H:%M:%S.%3f %Z)},{h({l})},{f},{L},{m}{n}",
         )))
         .build(log_file_path)
         .unwrap();
 
     let config = Config::builder()
-        .appender(Appender::builder().build("logfile", Box::new(logfile)))
         .appender(
             Appender::builder()
-                // コマンドラインはInfoまで
-                .filter(Box::new(ThresholdFilter::new(LevelFilter::Info)))
+                .filter(Box::new(ThresholdFilter::new(LevelFilter::Trace)))
+                .build("logfile", Box::new(logfile)),
+        )
+        .appender(
+            Appender::builder()
+                .filter(Box::new(ThresholdFilter::new(LevelFilter::Debug)))
                 .build("stderr", Box::new(stderr)),
         )
         .build(
             Root::builder()
                 .appender("logfile")
                 .appender("stderr")
-                // ファイル出力はDebugまで
-                .build(LevelFilter::Debug),
+                .build(LevelFilter::Trace),
         )
         .unwrap();
 
@@ -57,26 +58,29 @@ fn make_logger(log_file_path: &str) {
 
 #[cfg(not(debug_assertions))]
 fn make_logger(log_file_path: &str) {
-    // println!("デバッグ用のロガー");
     // ファイル・コマンドライン
     let stderr = ConsoleAppender::builder()
         .target(Target::Stderr)
-        .encoder(Box::new(PatternEncoder::new("{l} - {f},{L} - {m}\n")))
+        .encoder(Box::new(PatternEncoder::new("{l} - {f},{L} - {m}{n}")))
         .build();
 
     // ファイル出力の設定
     let logfile = FileAppender::builder()
         .encoder(Box::new(PatternEncoder::new(
-            "{h({l})},{d},{f},{L},{M},{m},{n}",
+            "{d(%Y-%m-%d %H:%M:%S.%3f %Z)},{h({l})},{f},{L},{m}{n}",
         )))
         .build(log_file_path)
         .unwrap();
 
     let config = Config::builder()
-        .appender(Appender::builder().build("logfile", Box::new(logfile)))
         .appender(
             Appender::builder()
-                .filter(Box::new(ThresholdFilter::new(LevelFilter::Error)))
+                .filter(Box::new(ThresholdFilter::new(LevelFilter::Info)))
+                .build("logfile", Box::new(logfile)),
+        )
+        .appender(
+            Appender::builder()
+                .filter(Box::new(ThresholdFilter::new(LevelFilter::Warn)))
                 .build("stderr", Box::new(stderr)),
         )
         .build(

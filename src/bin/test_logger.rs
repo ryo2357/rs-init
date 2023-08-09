@@ -1,9 +1,9 @@
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 
-extern crate mylogger;
 fn main() {
     mylogger::init();
 
+    trace!("trace message");
     debug!("debug message");
     info!("informational message");
     warn!("warning message");
